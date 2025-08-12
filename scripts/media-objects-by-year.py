@@ -87,7 +87,7 @@ for media in media_objects_year:
             'Collection': media['media_object'],
             'Week': week_num,
             'Date': week_info['date'],
-            'UPeers Total': week_info['upeers_total'],
+            'Downloaders': week_info['upeers_total'],
             'Year-Week': f"{week_info['date'].year}-W{week_info['date'].isocalendar().week:02d}"
         })
 
@@ -104,7 +104,7 @@ colors = plt.cm.tab20(np.linspace(0, 1, len(collections)))
 for collection, color in zip(collections, colors):
     collection_data = df_year[df_year['Collection'] == collection]
     plt.plot(collection_data['Date'],
-             collection_data['UPeers Total'],
+             collection_data['Downloaders'],
              label=collection,
              color=color,
              marker='o',
@@ -119,11 +119,11 @@ plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.xticks(rotation=45)
 
 # Highlight quarter boundaries
-for quarter in range(1, 5):
-    quarter_start = datetime(int(inputyear), (quarter-1)*3 + 1, 1)
-    plt.axvline(x=quarter_start, color='gray', linestyle=':', alpha=0.5)
-    plt.text(quarter_start, plt.ylim()[1]*0.95, f'Q{quarter}',
-             ha='left', va='top', backgroundcolor='white')
+#for quarter in range(1, 5):
+#    quarter_start = datetime(int(inputyear), (quarter-1)*3 + 1, 1)
+#    plt.axvline(x=quarter_start, color='gray', linestyle=':', alpha=0.5)
+#    plt.text(quarter_start, plt.ylim()[1]*0.95, f'Q{quarter}',
+#             ha='left', va='top', backgroundcolor='white')
 
 plt.tight_layout()
 plt.show()
@@ -132,5 +132,5 @@ plt.show()
 print("\nAdditional 2024 Statistics:")
 print(f"Number of media objects in {inputyear}: {len(media_objects_year)}")
 print("\nPeak weeks for each collection:")
-peak_weeks = df_year.loc[df_year.groupby('Collection')['UPeers Total'].idxmax()]
-print(peak_weeks[['Collection', 'Year-Week', 'UPeers Total']].sort_values('UPeers Total', ascending=False))
+peak_weeks = df_year.loc[df_year.groupby('Collection')['Downloaders'].idxmax()]
+print(peak_weeks[['Collection', 'Year-Week', 'Downloaders']].sort_values('Downloaders', ascending=False))
