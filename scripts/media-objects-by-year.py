@@ -11,17 +11,21 @@ from datetime import datetime, timedelta
 # setup
 inputdir = sys.argv[1];
 if os.path.exists(inputdir):
-    print(f"input data file '{inputdir}' found")
+    print(f"input data directory '{inputdir}' found")
 else:
-    print(f"Error: input json file '{inputdir}' not found")
+    print(f"Error: input json directory '{inputdir}' not found")
     sys.exit(1)
+
+inputyear = sys.argv[2];
+print(f"input year {inputyear}")
+
 
 # Function to parse ISO week date
 def iso_to_date(year, week, day=1):
     return datetime.strptime(f"{year}-W{week}-1", "%Y-W%W-%w")
 
-# Load all files and extract 2024 data
-media_objects_2024 = []
+# Load all files and extract year data
+media_objects_year = []
 
 for file in os.listdir(inputdir):
     if file.endswith('.json'):
@@ -37,8 +41,8 @@ for file in os.listdir(inputdir):
             start_year = data.get('sample-year-start')
             start_day = data.get('sample-day-year-start')
 
-            # Only process if it's in 2024
-            if start_year == 2024:
+            # Only process if it's in the right year
+            if int(start_year) == int(inputyear):
                 # Convert start day to date
                 try:
                     start_date_p = datetime.strptime(f"{start_year} {start_day}", "%Y %j").date()
@@ -66,20 +70,20 @@ for file in os.listdir(inputdir):
                             'media_object': media_object
                         }
 
-                media_objects_2024.append({
+                media_objects_year.append({
                     'media_object': media_object,
                     'start_date': start_date,
                     'week_data': week_data
                 })
 
-print(media_objects_2024)
+#print(media_objects_year)
 
 
-# Create a combined DataFrame for 2024
-weekly_2024_data = []
-for media in media_objects_2024:
+# Create a combined DataFrame for year
+weekly_data = []
+for media in media_objects_year:
     for week_num, week_info in media['week_data'].items():
-        weekly_2024_data.append({
+        weekly_data.append({
             'Collection': media['media_object'],
             'Week': week_num,
             'Date': week_info['date'],
@@ -87,18 +91,18 @@ for media in media_objects_2024:
             'Year-Week': f"{week_info['date'].year}-W{week_info['date'].isocalendar().week:02d}"
         })
 
-df_2024 = pd.DataFrame(weekly_2024_data)
-print(df_2024)
+df_year = pd.DataFrame(weekly_data)
+print(df_year)
 
 # Plot 2024 data
 plt.figure(figsize=(15, 8))
 
 # Get unique collections for color coding
-collections = df_2024['Collection'].unique()
+collections = df_year['Collection'].unique()
 colors = plt.cm.tab20(np.linspace(0, 1, len(collections)))
 
 for collection, color in zip(collections, colors):
-    collection_data = df_2024[df_2024['Collection'] == collection]
+    collection_data = df_year[df_year['Collection'] == collection]
     plt.plot(collection_data['Date'],
              collection_data['UPeers Total'],
              label=collection,
@@ -106,16 +110,17 @@ for collection, color in zip(collections, colors):
              marker='o',
              linewidth=2)
 
-plt.title('4. Year-by-Year Deep Dive: 2024 Weekly UPeers Total by Media Object', pad=20)
+gtitle = "Year " + inputyear + " Weekly Downloads by Media Object"    
+plt.title(gtitle, pad=20)
 plt.xlabel('Week')
-plt.ylabel('UPeers Total')
+plt.ylabel('Downloaders Total')
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.xticks(rotation=45)
 
 # Highlight quarter boundaries
 for quarter in range(1, 5):
-    quarter_start = datetime(2024, (quarter-1)*3 + 1, 1)
+    quarter_start = datetime(int(inputyear), (quarter-1)*3 + 1, 1)
     plt.axvline(x=quarter_start, color='gray', linestyle=':', alpha=0.5)
     plt.text(quarter_start, plt.ylim()[1]*0.95, f'Q{quarter}',
              ha='left', va='top', backgroundcolor='white')
@@ -125,7 +130,7 @@ plt.show()
 
 # Additional analysis
 print("\nAdditional 2024 Statistics:")
-print(f"Number of media objects in 2024: {len(media_objects_2024)}")
+print(f"Number of media objects in {inputyear}: {len(media_objects_year)}")
 print("\nPeak weeks for each collection:")
-peak_weeks = df_2024.loc[df_2024.groupby('Collection')['UPeers Total'].idxmax()]
+peak_weeks = df_year.loc[df_year.groupby('Collection')['UPeers Total'].idxmax()]
 print(peak_weeks[['Collection', 'Year-Week', 'UPeers Total']].sort_values('UPeers Total', ascending=False))
