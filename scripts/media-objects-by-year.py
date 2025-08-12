@@ -66,8 +66,7 @@ for file in os.listdir(inputdir):
                         week_date = start_date_p + timedelta(weeks=week_num)
                         week_data[week_num] = {
                             'date': week_date,
-                            'upeers_total': upeers_total,
-                            'media_object': media_object
+                            'upeers_total': upeers_total
                         }
 
                 media_objects_year.append({
@@ -76,25 +75,24 @@ for file in os.listdir(inputdir):
                     'week_data': week_data
                 })
 
-#print(media_objects_year)
-
 
 # Create a combined DataFrame for year
 weekly_data = []
 for media in media_objects_year:
     for week_num, week_info in media['week_data'].items():
-        weekly_data.append({
-            'Collection': media['media_object'],
-            'Week': week_num,
-            'Date': week_info['date'],
-            'Downloaders': week_info['upeers_total'],
-            'Year-Week': f"{week_info['date'].year}-W{week_info['date'].isocalendar().week:02d}"
-        })
+        if int(week_info['date'].year) == int(inputyear):
+            weekly_data.append({
+                'Collection': media['media_object'],
+                'Week': week_num,
+                'Date': week_info['date'],
+                'Downloaders': week_info['upeers_total'],
+                'Year-Week': f"{week_info['date'].year}-W{week_info['date'].isocalendar().week:02d}"
+            })
 
 df_year = pd.DataFrame(weekly_data)
 print(df_year)
 
-# Plot 2024 data
+# Plot year data
 plt.figure(figsize=(15, 8))
 
 # Get unique collections for color coding
