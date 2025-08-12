@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# run like: ./media-objects-by-year.py ../json.cumulative-detail 2022
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -86,7 +88,8 @@ for media in media_objects_year:
                 'Week': week_num,
                 'Date': week_info['date'],
                 'Downloaders': week_info['upeers_total'],
-                'Year-Week': f"{week_info['date'].year}-W{week_info['date'].isocalendar().week:02d}"
+#                'Year-Week': f"{week_info['date'].year}-W{week_info['date'].isocalendar().week:02d}"
+                'Year-Week': f"{week_info['date'].isocalendar().week:02d}"
             })
 
 df_year = pd.DataFrame(weekly_data)
@@ -102,6 +105,7 @@ colors = plt.cm.tab20(np.linspace(0, 1, len(collections)))
 for collection, color in zip(collections, colors):
     collection_data = df_year[df_year['Collection'] == collection]
     plt.plot(collection_data['Date'],
+#    plt.plot(collection_data['Year-Week'],
              collection_data['Downloaders'],
              label=collection,
              color=color,
@@ -114,7 +118,8 @@ plt.xlabel('Week')
 plt.ylabel('Downloaders Total')
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
-plt.xticks(rotation=45)
+plt.xticks(rotation=90)
+#plt.xlim(1, 52)
 
 # Highlight quarter boundaries
 #for quarter in range(1, 5):
